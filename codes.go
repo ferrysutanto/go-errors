@@ -22,6 +22,7 @@ const (
 	ErrRequestedRangeNotSatisfiable ErrCode = 416
 	ErrTooManyRequests              ErrCode = 429
 	ErrUnexpected                   ErrCode = 500
+	ErrNotImplemented               ErrCode = 501
 	ErrServiceUnavailable           ErrCode = 503
 	ErrGatewayTimeout               ErrCode = 504
 
