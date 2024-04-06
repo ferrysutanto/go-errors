@@ -46,11 +46,7 @@ func (e *Error) Errors() string {
 }
 
 func New(msg string) *Error {
-	err := Error{
-		message: msg,
-	}
-
-	return &err
+	return NewWithCode(msg, ErrUnknown)
 }
 
 func NewWithCode(msg string, code ErrCode) *Error {
@@ -62,7 +58,9 @@ func NewWithCode(msg string, code ErrCode) *Error {
 		fileName:     t.FileName,
 		functionName: t.FunctionName,
 		line:         t.Line,
+		stacks:       make([]*Error, 0),
 	}
+	err.stacks = append(err.stacks, &err)
 
 	return &err
 }
