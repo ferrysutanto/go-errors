@@ -24,4 +24,7 @@ const (
 	ErrUnexpected                   ErrCode = 500
 	ErrServiceUnavailable           ErrCode = 503
 	ErrGatewayTimeout               ErrCode = 504
+
+	// Custom error code
+	ErrBadCode ErrCode = 430
 )

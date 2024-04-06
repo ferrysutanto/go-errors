@@ -9,6 +9,10 @@ type Error struct {
 	message string
 	code    ErrCode
 
+	fileName     string
+	functionName string
+	line         int
+
 	stacks []*Error
 }
 
@@ -27,7 +31,7 @@ func (e *Error) Stacks() []string {
 
 	resp := make([]string, len(e.stacks))
 	for k, err := range e.stacks {
-		resp[k] = err.message
+		resp[k] = fmt.Sprintf("%s:%s:%d %s", err.fileName, err.functionName, err.line, err.message)
 	}
 
 	return resp
@@ -50,42 +54,48 @@ func New(msg string) *Error {
 }
 
 func NewWithCode(msg string, code ErrCode) *Error {
+	t := getTrace()
+
 	err := Error{
-		message: msg,
-		code:    code,
+		message:      msg,
+		code:         code,
+		fileName:     t.FileName,
+		functionName: t.FunctionName,
+		line:         t.Line,
 	}
 
 	return &err
 }
 
-type ErrProps struct {
-	ClientError     *Error
-	ClientErrorCode *ErrCode
-	RootCause       *Error
-	RootCauseCode   *ErrCode
-}
-
 func Wrap(err error, msg string) *Error {
-	return WrapWithCode(err, msg, ErrUnexpected)
+	return WrapWithCode(err, msg, ErrUnknown)
 }
 
 func WrapWithCode(err error, msg string, code ErrCode) *Error {
+	t := getTrace()
+
 	resp := Error{
-		message: msg,
-		code:    code,
-		stacks:  make([]*Error, 0),
+		message:      msg,
+		code:         code,
+		fileName:     t.FileName,
+		functionName: t.FunctionName,
+		line:         t.Line,
+		stacks:       make([]*Error, 0),
 	}
 
 	if err == nil {
 		return &resp
 	}
 
-	if t, ok := err.(*Error); ok {
-		if t == nil {
+	if ce, ok := err.(*Error); ok {
+		if ce == nil {
 			rootCause := &Error{
-				message: msg,
-				code:    code,
-				stacks:  make([]*Error, 0),
+				message:      msg,
+				code:         code,
+				fileName:     t.FileName,
+				functionName: t.FunctionName,
+				line:         t.Line,
+				stacks:       make([]*Error, 0),
 			}
 
 			resp.stacks = append(resp.stacks, rootCause)
@@ -93,9 +103,9 @@ func WrapWithCode(err error, msg string, code ErrCode) *Error {
 			return &resp
 		}
 
-		resp.stacks = append([]*Error{&resp}, t.stacks...)
+		resp.stacks = append([]*Error{&resp}, ce.stacks...)
 	} else {
-		resp.stacks = append(resp.stacks, New(err.Error()))
+		resp.stacks = append(resp.stacks, &resp, NewWithCode(err.Error(), code))
 	}
 
 	return &resp
