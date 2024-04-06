@@ -67,6 +67,14 @@ func NewWithCode(msg string, code ErrCode) *Error {
 	return &err
 }
 
+func Newf(format string, args ...interface{}) *Error {
+	return New(fmt.Sprintf(format, args...))
+}
+
+func NewfWithCode(code ErrCode, format string, args ...interface{}) *Error {
+	return NewWithCode(fmt.Sprintf(format, args...), code)
+}
+
 func Wrap(err error, msg string) *Error {
 	return WrapWithCode(err, msg, ErrUnknown)
 }
