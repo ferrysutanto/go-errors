@@ -163,6 +163,22 @@ func RootCause(err error) *Error {
 	}
 }
 
+func Code(err error) ErrCode {
+	if t, ok := err.(*Error); ok {
+		return t.Code()
+	}
+
+	return ErrUnexpected
+}
+
+func Stacks(err error) string {
+	if t, ok := err.(*Error); ok {
+		return strings.Join(t.Stacks(), "\n")
+	}
+
+	return err.Error()
+}
+
 func Client(err error) *Error {
 	if t, ok := err.(*Error); ok {
 		return t
