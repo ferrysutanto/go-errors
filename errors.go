@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -129,11 +130,19 @@ func ErrorfWithCode(code ErrCode, format string, args ...interface{}) error {
 }
 
 func Is(err, target error) bool {
+	if (err == nil && target != nil) || (err != nil && target == nil) {
+		return false
+	}
+
+	if err.Error() == target.Error() {
+		return true
+	}
+
 	return false
 }
 
 func As(err error, target interface{}) bool {
-	return false
+	return errors.As(err, target)
 }
 
 func Unwrap(err error) error {
